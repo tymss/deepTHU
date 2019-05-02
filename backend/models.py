@@ -2,10 +2,11 @@ from django.db import models
 
 state_list = ['CREATING', 'CREATED', 'RUNNING', 'FINISHED', 'FAILED']
 
+
 class Task(models.Model):
 
-    task_id = models.CharField(primary_key=True, max_length=20, unique=True)
-    state = models.CharField(max_length=20, choices=state_list)
+    task_id = models.CharField(primary_key=True, max_length=32, unique=True)
+    state = models.CharField(max_length=20, default='CREATING')
     create_time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
