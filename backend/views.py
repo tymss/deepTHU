@@ -8,6 +8,7 @@ from .models import Task
 @api_view(['GET', 'POST', ])
 def src_upload_view(request):
     if request.method == 'POST':
+        ''' To get a unique uuid that not exists in the db. '''
         task_id = uuid.uuid4()
         obj, is_created = Task.objects.get_or_create(task_id=task_id)
         while not is_created:

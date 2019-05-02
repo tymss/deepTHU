@@ -1,6 +1,11 @@
 from rest_framework import serializers
 
 
+'''
+Serializers to convert classes into json objects.
+You can use these serializers by calling functions like: get_xxx_response
+instead of using these classes directly.
+'''
 class ErrorData(object):
     def __init__(self, err_info):
         self.error_info = err_info
