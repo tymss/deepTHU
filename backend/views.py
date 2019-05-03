@@ -61,6 +61,8 @@ def dst_upload_view(request):
             obj = Task.objects.get(task_id=task_id)
         except Task.DoesNotExist:
             return Response(get_err_response('Task:%s is not found.' % task_id), status=404)
+        if obj.state != 'CREATING':
+            return Response(get_err_response('Task:%s is not creating.' % task_id), status=409)
 
         task_dir = TASK_PATH + task_id + '/dst'
         if not os.path.exists(task_dir):
