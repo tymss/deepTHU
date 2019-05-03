@@ -1,13 +1,14 @@
 from rest_framework.response import Response
 from .serializer import get_err_response, get_task_id_response, get_task_state_response
 from rest_framework.decorators import api_view
+from django.http.response import FileResponse
 import uuid
 from .models import Task
 import os
 
 MAX_SIZE = (1 << 20) * 10
 TASK_PATH = '/home/azure2016080036/task/'
-#TASK_PATH = './' (debug)
+
 
 @api_view(['GET', 'POST', ])
 def src_upload_view(request):
@@ -47,7 +48,7 @@ def src_upload_view(request):
         return Response(get_task_id_response(task_id), status=200)
 
     else:
-        return Response(get_err_response('Method %s is not supported.' % request.method), status=400)
+        return Response(get_err_response('Method %s is not supported.' % request.method), status=405)
 
 
 @api_view(['GET', 'POST', ])
@@ -89,7 +90,7 @@ def dst_upload_view(request):
         return Response(get_task_id_response(task_id), status=200)
 
     else:
-        return Response(get_err_response('Method %s not supported.' % request.method), status=400)
+        return Response(get_err_response('Method %s not supported.' % request.method), status=405)
 
 
 @api_view(['GET', 'POST', ])
@@ -105,23 +106,28 @@ def task_query_view(request):
         return Response(get_task_state_response(id, obj.state), status=200)
 
     else:
-        return Response(get_err_response('Method %s not supported.' % request.method), status=400)
+        return Response(get_err_response('Method %s not supported.' % request.method), status=405)
 
 
 @api_view(['GET', 'POST', ])
 def task_result_view(request):
     if request.method == 'GET':
-        id = request.GET.get('task_id')
-        if id is None:
+        task_id = request.GET.get('task_id')
+        if task_id is None:
             return Response(get_err_response('Parameter \'task_id\' is needed.'), status=400)
         try:
-            obj = Task.objects.get(task_id=id)
+            obj = Task.objects.get(task_id=task_id)
         except Task.DoesNotExist:
-            return Response(get_err_response('Task:%s is not found.' % id), status=404)
+            return Response(get_err_response('Task:%s is not found.' % task_id), status=404)
         if obj.state != 'FINISHED':
-            return Response(get_err_response('Task:%s is not finished.' % id), status=409)
-        # TODO: download file
+            return Response(get_err_response('Task:%s is not finished.' % task_id), status=409)
 
-
+        result_dir = TASK_PATH + task_id + '/result'
+        try:
+            dirs = os.listdir(result_dir)
+            result_file = result_dir + '/' + dirs[0]
+            return FileResponse(open(result_file, 'rb'), filename=dirs[0])
+        except Exception as e:
+            return Response(get_err_response('Result cannot be downloaded because of unknown reasons.'), status=500)
     else:
-        return Response(get_err_response('Method %s not supported.' % request.method), status=400)
+        return Response(get_err_response('Method %s not supported.' % request.method), status=405)
