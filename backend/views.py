@@ -1,13 +1,11 @@
+import uuid
+import os
 from rest_framework.response import Response
 from .serializer import get_err_response, get_task_id_response, get_task_state_response
 from rest_framework.decorators import api_view
 from django.http.response import FileResponse
-import uuid
 from .models import Task
-import os
-
-MAX_SIZE = (1 << 20) * 10
-TASK_PATH = '/home/azure2016080036/task/'
+from .configs import TASK_PATH, MAX_SIZE
 
 
 @api_view(['GET', 'POST', ])
