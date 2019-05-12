@@ -4,6 +4,8 @@ TASK_PATH = '/home/azure2016080036/task/'
 
 MAX_SIZE = (1 << 20) * 10  # B
 
-REFRESH_INTERVAL = 2  # seconds
+REFRESH_INTERVAL = 60  # seconds
 
 TASK_MAX_DAYS = 30
+
+MAX_RUNNING_NUM = 2

@@ -4,13 +4,14 @@ import os, shutil
 import pytz
 from .models import Task
 from datetime import datetime, timedelta
-from .configs import TASK_MAX_DAYS, TASK_PATH, REFRESH_INTERVAL
+from .configs import TASK_MAX_DAYS, TASK_PATH, REFRESH_INTERVAL, MAX_RUNNING_NUM
+from .executor import ExecThread
 
 
 class BackThread(threading.Thread):
 
     def run(self):
-        print('Start backend thread...')
+        print('Starting backend thread...')
         while True:
             """ clean overtime tasks """
             time_limit = datetime.now(tz=pytz.UTC) - timedelta(days=TASK_MAX_DAYS)
@@ -22,8 +23,20 @@ class BackThread(threading.Thread):
                         shutil.rmtree(path)
                     each.delete()
 
-            """ dispatch """
-            # TODO: dispatch
+            """ schedule """
+            objs = Task.objects.filter(state='RUNNING')
+            running_num = len(objs)
+            while running_num < MAX_RUNNING_NUM:
+                waiting = Task.objects.filter(state='CREATED').order_by('create_time')
+                if len(waiting) > 0:
+                    to_run = waiting[0]
+                    to_run.state = 'RUNNING'
+                    to_run.save()
+                    exe_thread = ExecThread(to_run.task_id)
+                    exe_thread.start()
+                    running_num += 1
+                else:
+                    break
             time.sleep(REFRESH_INTERVAL)
 
 
