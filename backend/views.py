@@ -20,9 +20,7 @@ def src_upload_view(request):
             obj, is_created = Task.objects.get_or_create(task_id=task_id)
 
         # makedir of task
-        task_dir = TASK_PATH + task_id + '/src'
-        if not os.path.exists(task_dir):
-            os.makedirs(task_dir)
+        check_and_makedirs(TASK_PATH + task_id + '/src')
 
         files = request.FILES.getlist('file')
         if len(files) != 1:
@@ -62,9 +60,9 @@ def dst_upload_view(request):
         if obj.state != 'CREATING':
             return Response(get_err_response('Task:%s is not creating.' % task_id), status=409)
 
-        task_dir = TASK_PATH + task_id + '/dst'
-        if not os.path.exists(task_dir):
-            os.makedirs(task_dir)
+        task_path = TASK_PATH + task_id
+
+        check_and_makedirs(task_path + '/dst')
 
         files = request.FILES.getlist('file')
         if len(files) != 1:
@@ -75,7 +73,7 @@ def dst_upload_view(request):
 
         # TODO: to check the type of uploaded file
 
-        file_path = TASK_PATH + task_id + '/dst/' + uploaded.name
+        file_path = task_path + '/dst/' + uploaded.name
         try:
             with open(file_path, 'wb') as f:
                 for chunk in uploaded.chunks():
@@ -84,6 +82,14 @@ def dst_upload_view(request):
             if os.path.exists(file_path):
                 os.remove(path=file_path)
             return Response(get_err_response('File cannot be saved because of some unknown reasons'), status=500)
+
+        # create needed dirs of task
+        check_and_makedirs(task_path + '/src_pic')
+        check_and_makedirs(task_path + '/dst_pic')
+        check_and_makedirs(task_path + '/src_face')
+        check_and_makedirs(task_path + '/dst_face')
+        check_and_makedirs(task_path + '/model')
+        check_and_makedirs(task_path + '/result_pic')
 
         obj.state = 'CREATED'
         obj.save()
@@ -131,3 +137,8 @@ def task_result_view(request):
             return Response(get_err_response('Result cannot be downloaded because of unknown reasons.'), status=500)
     else:
         return Response(get_err_response('Method %s not supported.' % request.method), status=405)
+
+
+def check_and_makedirs(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
