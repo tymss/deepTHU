@@ -1,6 +1,7 @@
 import threading
 import time
-import os, shutil
+import os
+import shutil
 import pytz
 from .models import Task
 from datetime import datetime, timedelta

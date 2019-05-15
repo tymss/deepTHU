@@ -2,6 +2,8 @@ STATE_LIST = ['CREATING', 'CREATED', 'RUNNING', 'FINISHED', 'FAILED']
 
 TASK_PATH = '/home/azure2016080036/task/'
 
+DEEPFACE_PATH = '/home/azure2016080036/faceswap/faceswap.py'
+
 MAX_SIZE = (1 << 20) * 10  # B
 
 REFRESH_INTERVAL = 60  # seconds
@@ -9,3 +11,5 @@ REFRESH_INTERVAL = 60  # seconds
 TASK_MAX_DAYS = 30
 
 MAX_RUNNING_NUM = 2
+
+MAX_TRAINING_TIME = 18000  # seconds

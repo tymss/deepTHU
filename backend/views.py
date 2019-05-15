@@ -83,14 +83,6 @@ def dst_upload_view(request):
                 os.remove(path=file_path)
             return Response(get_err_response('File cannot be saved because of some unknown reasons'), status=500)
 
-        # create needed dirs of task
-        check_and_makedirs(task_path + '/src_pic')
-        check_and_makedirs(task_path + '/dst_pic')
-        check_and_makedirs(task_path + '/src_face')
-        check_and_makedirs(task_path + '/dst_face')
-        check_and_makedirs(task_path + '/model')
-        check_and_makedirs(task_path + '/result_pic')
-
         obj.state = 'CREATED'
         obj.save()
         return Response(get_task_id_response(task_id), status=200)
@@ -139,6 +131,4 @@ def task_result_view(request):
         return Response(get_err_response('Method %s not supported.' % request.method), status=405)
 
 
-def check_and_makedirs(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+
