@@ -1,9 +1,9 @@
 import threading
 import os
-import shutil
 import subprocess
 from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_TIME
 from .models import Task
+from .utils import check_and_makedirs
 
 
 class ExecThread(threading.Thread):
@@ -107,10 +107,3 @@ class ExecThread(threading.Thread):
             obj.state = 'FAILED'
             obj.save()
 
-
-def check_and_makedirs(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-    else:
-        shutil.rmtree(path)
-        os.makedirs(path)
