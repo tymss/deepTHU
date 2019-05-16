@@ -103,6 +103,8 @@ class ExecThread(threading.Thread):
                         raise Exception('Return code not 0 when converting result pics into video.')
                 except:
                     raise
+                obj.state = 'FINISHED'
+                obj.save()
         except:
             obj.state = 'FAILED'
             obj.save()
