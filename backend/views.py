@@ -125,7 +125,7 @@ def task_result_view(request):
         try:
             dirs = os.listdir(result_dir)
             result_file = result_dir + '/' + dirs[0]
-            return FileResponse(open(result_file, 'rb'), filename=dirs[0])
+            return FileResponse(open(result_file, 'rb'), as_attachment=True, filename=dirs[0])
         except Exception as e:
             return Response(get_err_response('Result cannot be downloaded because of unknown reasons.'), status=500)
     else:
