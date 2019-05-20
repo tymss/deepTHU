@@ -1,7 +1,7 @@
 import threading
 import os
 import subprocess
-from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_TIME
+from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_TIME, WRAPPER_PATH, LOSS_THRESHOLD
 from .models import Task
 from .utils import check_and_makedirs
 
@@ -27,6 +27,7 @@ class ExecThread(threading.Thread):
         check_and_makedirs(task_path + '/dst_face')
         check_and_makedirs(task_path + '/model')
         check_and_makedirs(task_path + '/result_pic')
+        check_and_makedirs(task_path + '/result')
         try:
             with open(task_path + '/task.log', 'a') as log_file:
 
@@ -74,11 +75,12 @@ class ExecThread(threading.Thread):
 
                 # train
                 p = subprocess.Popen(
-                    ['python', DEEPFACE_PATH, 'train', '-A', task_path + '/src_face', '-B', task_path + '/dst_face',
-                     '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
+                    ['python', WRAPPER_PATH, LOSS_THRESHOLD, task_path + '/src_face', task_path + '/dst_face',
+                     task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait(MAX_TRAINING_TIME) != 0:
                         raise Exception('Return code not 0 when training.')
+                    print('Wrapper return 0.')
                 except subprocess.TimeoutExpired:
                     p.kill()
                 except:
@@ -96,7 +98,7 @@ class ExecThread(threading.Thread):
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', 'result.mp4']
+                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.mp4']
                 )
                 try:
                     if p.wait() != 0:
@@ -105,7 +107,8 @@ class ExecThread(threading.Thread):
                     raise
                 obj.state = 'FINISHED'
                 obj.save()
-        except:
+        except Exception as e:
+            print(e)
             obj.state = 'FAILED'
             obj.save()
 
