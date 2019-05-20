@@ -4,7 +4,7 @@ TASK_PATH = '/home/azure2016080036/task/'
 
 DEEPFACE_PATH = '/home/azure2016080036/faceswap/faceswap.py'
 
-MAX_SIZE = (1 << 20) * 10  # B
+MAX_SIZE = (1 << 20) * 50  # B
 
 REFRESH_INTERVAL = 60  # seconds
 
