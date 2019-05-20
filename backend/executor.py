@@ -80,7 +80,7 @@ class ExecThread(threading.Thread):
                     if p.wait(MAX_TRAINING_TIME) != 0:
                         raise Exception('Return code not 0 when training.')
                 except subprocess.TimeoutExpired:
-                    pass
+                    p.kill()
                 except:
                     raise
 
