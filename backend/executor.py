@@ -98,8 +98,8 @@ class ExecThread(threading.Thread):
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.mp4']
-                )
+                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.mp4'],
+                    stderr=log_file, stdout=log_file)
                 try:
                     if p.wait() != 0:
                         raise Exception('Return code not 0 when converting result pics into video.')
