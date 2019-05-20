@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from .back_thread import init_thread
+
+init_thread()
 
 urlpatterns = [
     path('api/v1/src/upload', views.src_upload_view),

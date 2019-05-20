@@ -25,7 +25,7 @@ SECRET_KEY = 'h23gi#plyea%!$(m1f$i&lk*e07v$3bpfvl9b0vgpxwiw4qd)n'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,19 +38,29 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'backend'
+    'backend',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
+# CORS
+CORS_ORIGIN_ALLOW_ALL = True
+'''
+CORS_ORIGIN_WHITELIST = (
+    '192.168.31.158:8080',
+)
+CORS_ALLOW_CREDENTIALS = True
+'''
 ROOT_URLCONF = 'deepTHU.urls'
 
 TEMPLATES = [

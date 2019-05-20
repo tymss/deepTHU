@@ -1,13 +1,12 @@
+import uuid
+import os
 from rest_framework.response import Response
 from .serializer import get_err_response, get_task_id_response, get_task_state_response
 from rest_framework.decorators import api_view
 from django.http.response import FileResponse
-import uuid
 from .models import Task
-import os
-
-MAX_SIZE = (1 << 20) * 10
-TASK_PATH = '/home/azure2016080036/task/'
+from .configs import TASK_PATH, MAX_SIZE
+from .utils import check_and_makedirs
 
 
 @api_view(['GET', 'POST', ])
@@ -22,9 +21,7 @@ def src_upload_view(request):
             obj, is_created = Task.objects.get_or_create(task_id=task_id)
 
         # makedir of task
-        task_dir = TASK_PATH + task_id + '/src'
-        if not os.path.exists(task_dir):
-            os.makedirs(task_dir)
+        check_and_makedirs(TASK_PATH + task_id + '/src')
 
         files = request.FILES.getlist('file')
         if len(files) != 1:
@@ -61,10 +58,12 @@ def dst_upload_view(request):
             obj = Task.objects.get(task_id=task_id)
         except Task.DoesNotExist:
             return Response(get_err_response('Task:%s is not found.' % task_id), status=404)
+        if obj.state != 'CREATING':
+            return Response(get_err_response('Task:%s is not creating.' % task_id), status=409)
 
-        task_dir = TASK_PATH + task_id + '/dst'
-        if not os.path.exists(task_dir):
-            os.makedirs(task_dir)
+        task_path = TASK_PATH + task_id
+
+        check_and_makedirs(task_path + '/dst')
 
         files = request.FILES.getlist('file')
         if len(files) != 1:
@@ -75,7 +74,7 @@ def dst_upload_view(request):
 
         # TODO: to check the type of uploaded file
 
-        file_path = TASK_PATH + task_id + '/dst/' + uploaded.name
+        file_path = task_path + '/dst/' + uploaded.name
         try:
             with open(file_path, 'wb') as f:
                 for chunk in uploaded.chunks():
@@ -126,8 +125,11 @@ def task_result_view(request):
         try:
             dirs = os.listdir(result_dir)
             result_file = result_dir + '/' + dirs[0]
-            return FileResponse(open(result_file, 'rb'), filename=dirs[0])
+            return FileResponse(open(result_file, 'rb'), as_attachment=True, filename=dirs[0])
         except Exception as e:
             return Response(get_err_response('Result cannot be downloaded because of unknown reasons.'), status=500)
     else:
         return Response(get_err_response('Method %s not supported.' % request.method), status=405)
+
+
+

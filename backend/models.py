@@ -1,7 +1,5 @@
 from django.db import models
 
-state_list = ['CREATING', 'CREATED', 'RUNNING', 'FINISHED', 'FAILED']
-
 
 class Task(models.Model):
 
