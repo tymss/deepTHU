@@ -75,7 +75,7 @@ class ExecThread(threading.Thread):
 
                 # train
                 p = subprocess.Popen(
-                    ['python', WRAPPER_PATH, LOSS_THRESHOLD, task_path + '/src_face', task_path + '/dst_face',
+                    ['python', WRAPPER_PATH, str(LOSS_THRESHOLD), task_path + '/dst_face', task_path + '/src_face',
                      task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait(MAX_TRAINING_TIME) != 0:
