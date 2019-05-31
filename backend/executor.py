@@ -78,7 +78,7 @@ class ExecThread(threading.Thread):
                     ['python', DEEPFACE_PATH, 'train', '-A', task_path + '/dst_face', '-B', task_path + '/src_face',
                      '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait(MAX_TRAINING_HOURS * 3600) != 0:
+                    if p.wait(obj.training_time * 3600) != 0:
                         raise Exception('Return code not 0 when training.')
                 except subprocess.TimeoutExpired:
                     p.kill()
@@ -97,7 +97,7 @@ class ExecThread(threading.Thread):
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.mp4'],
+                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.' + obj.dst_format],
                     stderr=log_file, stdout=log_file)
                 try:
                     if p.wait() != 0:
