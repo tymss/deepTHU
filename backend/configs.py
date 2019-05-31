@@ -2,8 +2,6 @@ STATE_LIST = ['CREATING', 'CREATED', 'RUNNING', 'FINISHED', 'FAILED']
 
 TASK_PATH = '/home/azure2016080036/task/'
 
-WRAPPER_PATH = '/home/azure2016080036/project/wrapper.py'
-
 DEEPFACE_PATH = '/home/azure2016080036/project/faceswap/faceswap.py'
 
 MAX_SIZE = (1 << 20) * 50  # B
@@ -14,6 +12,5 @@ TASK_MAX_DAYS = 30
 
 MAX_RUNNING_NUM = 1
 
-MAX_TRAINING_TIME = 600  # seconds
+MAX_TRAINING_HOURS = 5
 
-LOSS_THRESHOLD = 0.08

@@ -1,7 +1,7 @@
 import threading
 import os
 import subprocess
-from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_TIME, WRAPPER_PATH, LOSS_THRESHOLD
+from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_HOURS
 from .models import Task
 from .utils import check_and_makedirs
 
@@ -75,12 +75,11 @@ class ExecThread(threading.Thread):
 
                 # train
                 p = subprocess.Popen(
-                    ['python', WRAPPER_PATH, str(LOSS_THRESHOLD), task_path + '/dst_face', task_path + '/src_face',
-                     task_path + '/model'], stderr=log_file, stdout=log_file)
+                    ['python', DEEPFACE_PATH, 'train', '-A', task_path + '/dst_face', '-B', task_path + '/src_face',
+                     '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait(MAX_TRAINING_TIME) != 0:
+                    if p.wait(MAX_TRAINING_HOURS * 3600) != 0:
                         raise Exception('Return code not 0 when training.')
-                    print('Wrapper return 0.')
                 except subprocess.TimeoutExpired:
                     p.kill()
                 except:
