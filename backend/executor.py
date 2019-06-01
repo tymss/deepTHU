@@ -3,7 +3,7 @@ import os
 import subprocess
 from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_HOURS
 from .models import Task
-from .utils import check_and_makedirs
+from .utils import check_and_makedirs, send_mail
 
 
 class ExecThread(threading.Thread):
@@ -106,6 +106,8 @@ class ExecThread(threading.Thread):
                     raise
                 obj.state = 'FINISHED'
                 obj.save()
+                if obj.email:
+                    send_mail(self.task_id, obj.email, 'FINISHED')
         except Exception as e:
             print(e)
             obj.state = 'FAILED'

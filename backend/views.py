@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view
 from django.http.response import FileResponse
 from .models import Task
 from .configs import TASK_PATH, MAX_SIZE, SUPPORTED_FORMAT, MAX_TRAINING_HOURS
-from .utils import check_and_makedirs, validate_email
+from .utils import check_and_makedirs, validate_email, send_mail
 
 
 @api_view(['GET', 'POST', ])
@@ -111,7 +111,8 @@ def dst_upload_view(request):
         obj.state = 'CREATED'
         obj.save()
 
-        # TODO: send email to the user to info the task_id.
+        if obj.email:
+            send_mail(task_id, obj.email, 'CREATED')
 
         return Response(get_task_id_response(task_id), status=200)
 
