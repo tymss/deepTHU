@@ -78,7 +78,7 @@ class ExecThread(threading.Thread):
                     ['python', DEEPFACE_PATH, 'train', '-A', task_path + '/dst_face', '-B', task_path + '/src_face',
                      '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait(obj.training_time * 3600) != 0:
+                    if p.wait(obj.training_time * 3600 - 1800) != 0:
                         raise Exception('Return code not 0 when training.')
                 except subprocess.TimeoutExpired:
                     p.kill()
