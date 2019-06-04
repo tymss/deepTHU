@@ -1,9 +1,9 @@
 import threading
 import os
 import subprocess
-from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_HOURS
+from .configs import TASK_PATH, DEEPFACE_PATH
 from .models import Task
-from .utils import check_and_makedirs
+from .utils import check_and_makedirs, send_mail
 
 
 class ExecThread(threading.Thread):
@@ -78,7 +78,7 @@ class ExecThread(threading.Thread):
                     ['python', DEEPFACE_PATH, 'train', '-A', task_path + '/dst_face', '-B', task_path + '/src_face',
                      '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait(MAX_TRAINING_HOURS * 3600) != 0:
+                    if p.wait(obj.training_time * 3600 - 1800) != 0:
                         raise Exception('Return code not 0 when training.')
                 except subprocess.TimeoutExpired:
                     p.kill()
@@ -97,8 +97,8 @@ class ExecThread(threading.Thread):
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.mp4'],
-                    stderr=log_file, stdout=log_file)
+                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', '-pix_fmt', 'yuv420p', task_path +
+                     '/result/result.' + obj.dst_format], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait() != 0:
                         raise Exception('Return code not 0 when converting result pics into video.')
@@ -106,6 +106,8 @@ class ExecThread(threading.Thread):
                     raise
                 obj.state = 'FINISHED'
                 obj.save()
+                if obj.email:
+                    send_mail(self.task_id, obj.email, 'FINISHED')
         except Exception as e:
             print(e)
             obj.state = 'FAILED'

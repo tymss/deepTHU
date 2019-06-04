@@ -5,8 +5,8 @@ from .serializer import get_err_response, get_task_id_response, get_task_state_r
 from rest_framework.decorators import api_view
 from django.http.response import FileResponse
 from .models import Task
-from .configs import TASK_PATH, MAX_SIZE
-from .utils import check_and_makedirs
+from .configs import TASK_PATH, MAX_SIZE, SUPPORTED_FORMAT, MAX_TRAINING_HOURS
+from .utils import check_and_makedirs, validate_email, send_mail
 
 
 @api_view(['GET', 'POST', ])
@@ -14,14 +14,25 @@ def src_upload_view(request):
     if request.method == 'POST':
         ''' To get a unique uuid that not exists in the db. '''
 
-        task_id = str(uuid.uuid4())
-        obj, is_created = Task.objects.get_or_create(task_id=task_id)
-        while not is_created:
-            task_id = str(uuid.uuid4())
-            obj, is_created = Task.objects.get_or_create(task_id=task_id)
+        training_time = request.GET.get('training_time')
+        email = request.GET.get('email')
+        if training_time is None:
+            return Response(get_err_response('Parameter \'training_time\' is needed.'), status=400)
+        try:
+            training_time = int(training_time)
+        except:
+            return Response(get_err_response('Training_time should be integer.'), status=400)
+        if training_time > MAX_TRAINING_HOURS or training_time <= 0:
+            return Response(get_err_response('Training_time should be less than %d and be more than 0.' % MAX_TRAINING_HOURS), status=400)
+        if email is not None:
+            if not validate_email(email):
+                return Response(get_err_response('Wrong email format.'), status=400)
 
-        # makedir of task
-        check_and_makedirs(TASK_PATH + task_id + '/src')
+        task_id = str(uuid.uuid4())
+        objs = Task.objects.filter(task_id=task_id)
+        while len(objs) != 0:
+            task_id = str(uuid.uuid4())
+            objs = Task.objects.filter(task_id=task_id)
 
         files = request.FILES.getlist('file')
         if len(files) != 1:
@@ -30,7 +41,17 @@ def src_upload_view(request):
         if uploaded.size > MAX_SIZE:
             return Response(get_err_response('Your file should be smaller than %dB.' % MAX_SIZE), status=413)
 
-        # TODO: to check the type of uploaded file
+        if uploaded.name.split('.')[-1] not in SUPPORTED_FORMAT:
+            return Response(get_err_response('Video format not supported.'), status=400)
+
+        if email is None:
+            task = Task(task_id=task_id, training_time=training_time)
+        else:
+            task = Task(task_id=task_id, training_time=training_time, email=email)
+        task.save()
+
+        # makedir of task
+        check_and_makedirs(TASK_PATH + task_id + '/src')
 
         file_path = TASK_PATH + task_id + '/src/' + uploaded.name
         try:
@@ -72,7 +93,10 @@ def dst_upload_view(request):
         if uploaded.size > MAX_SIZE:
             return Response(get_err_response('Your file should be smaller than %dB.' % MAX_SIZE), status=413)
 
-        # TODO: to check the type of uploaded file
+        if uploaded.name.split('.')[-1] not in SUPPORTED_FORMAT:
+            return Response(get_err_response('Video format not supported.'), status=400)
+
+        obj.dst_format = uploaded.name.split('.')[-1]
 
         file_path = task_path + '/dst/' + uploaded.name
         try:
@@ -86,6 +110,10 @@ def dst_upload_view(request):
 
         obj.state = 'CREATED'
         obj.save()
+
+        if obj.email:
+            send_mail(task_id, obj.email, 'CREATED')
+
         return Response(get_task_id_response(task_id), status=200)
 
     else:
