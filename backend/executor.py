@@ -1,7 +1,7 @@
 import threading
 import os
 import subprocess
-from .configs import TASK_PATH, DEEPFACE_PATH, MAX_TRAINING_HOURS
+from .configs import TASK_PATH, DEEPFACE_PATH
 from .models import Task
 from .utils import check_and_makedirs, send_mail
 
@@ -97,8 +97,8 @@ class ExecThread(threading.Thread):
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', task_path + '/result/result.' + obj.dst_format],
-                    stderr=log_file, stdout=log_file)
+                    ['ffmpeg', '-r', '25', '-i', task_path + '/result_pic/%d.png', '-pix_fmt', 'yuv420p', task_path +
+                     '/result/result.' + obj.dst_format], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait() != 0:
                         raise Exception('Return code not 0 when converting result pics into video.')
