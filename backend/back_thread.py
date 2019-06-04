@@ -5,7 +5,7 @@ import shutil
 import pytz
 from .models import Task
 from datetime import datetime, timedelta
-from .configs import TASK_MAX_DAYS, TASK_PATH, REFRESH_INTERVAL, MAX_RUNNING_NUM
+from .configs import TASK_MAX_DAYS, TASK_PATH, REFRESH_INTERVAL, MAX_RUNNING_NUM, TEMP_PATH
 from .executor import ExecThread
 
 
@@ -20,6 +20,9 @@ class BackThread(threading.Thread):
             for each in objs:
                 if each.state != 'RUNNING':
                     path = TASK_PATH + each.task_id
+                    if os.path.exists(path):
+                        shutil.rmtree(path)
+                    path = TEMP_PATH + each.task_id
                     if os.path.exists(path):
                         shutil.rmtree(path)
                     each.delete()
