@@ -21,13 +21,15 @@ class TaskIdSerializer(serializers.Serializer):
     task_id = serializers.CharField(max_length=32)
 
 class TaskStateData(object):
-    def __init__(self, taskid, state):
+    def __init__(self, taskid, state, position):
         self.task_id = taskid
         self.task_state = state
+        self.waiting_position = position
 
 class TaskStateSerializer(serializers.Serializer):
     task_id = serializers.CharField(max_length=32)
     task_state = serializers.CharField(max_length=20)
+    waiting_position = serializers.IntegerField()
 
 
 def get_err_response(err_info):
@@ -42,7 +44,7 @@ def get_task_id_response(taskid):
     return serializer.data
 
 
-def get_task_state_response(id, state):
-    ts = TaskStateData(id, state)
+def get_task_state_response(id, state, position):
+    ts = TaskStateData(id, state, position)
     serializer = TaskStateSerializer(ts)
     return serializer.data

@@ -130,7 +130,12 @@ def task_query_view(request):
             obj = Task.objects.get(task_id=id)
         except Task.DoesNotExist:
             return Response(get_err_response('Task:%s is not found.' % id), status=404)
-        return Response(get_task_state_response(id, obj.state), status=200)
+        if obj.state != 'CREATED':
+            position = -1
+        else:
+            waiting = Task.objects.filter(state='CREATED', create_time__lte=obj.create_time)
+            position = len(waiting)
+        return Response(get_task_state_response(id, obj.state, position), status=200)
 
     else:
         return Response(get_err_response('Method %s not supported.' % request.method), status=405)
