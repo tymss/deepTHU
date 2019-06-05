@@ -1,7 +1,7 @@
 import threading
 import os
 import subprocess
-from .configs import TASK_PATH, DEEPFACE_PATH, TEMP_PATH
+from .configs import TASK_PATH, DEEPFACE_PATH, TEMP_PATH, NORMAL_TASK_TIME_MAX
 from .models import Task
 from .utils import check_and_makedirs, send_mail
 
@@ -22,12 +22,14 @@ class ExecThread(threading.Thread):
             return
         obj = objs[0]
         # create needed dirs of task
+        check_and_makedirs(task_path + '/sound')
         check_and_makedirs(temp_path + '/src_pic')
         check_and_makedirs(temp_path + '/dst_pic')
         check_and_makedirs(temp_path + '/src_face')
         check_and_makedirs(temp_path + '/dst_face')
         check_and_makedirs(task_path + '/model')
         check_and_makedirs(temp_path + '/result_pic')
+        check_and_makedirs(temp_path + '/no_sound')
         check_and_makedirs(task_path + '/result')
         try:
             with open(task_path + '/task.log', 'a') as log_file:
@@ -35,10 +37,10 @@ class ExecThread(threading.Thread):
                 # convert src video into pics
                 dirs = os.listdir(task_path + '/src')
                 src_file = task_path + '/src/' + dirs[0]
-                p = subprocess.Popen(['ffmpeg', '-i', src_file, '-r', '25', temp_path + '/src_pic/%d.png'],
+                p = subprocess.Popen(['ffmpeg', '-i', src_file, '-r', '30', temp_path + '/src_pic/%d.png'],
                                      stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait() != 0:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when convert src video to pics.')
                 except:
                     raise
@@ -46,11 +48,20 @@ class ExecThread(threading.Thread):
                 # convert dst video into pics:
                 dirs = os.listdir(task_path + '/dst')
                 dst_file = task_path + '/dst/' + dirs[0]
-                p = subprocess.Popen(['ffmpeg', '-i', dst_file, '-r', '25', temp_path + '/dst_pic/%d.png'],
+                p = subprocess.Popen(['ffmpeg', '-i', dst_file, '-r', '30', temp_path + '/dst_pic/%d.png'],
                                      stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait() != 0:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when convert dst video to pics.')
+                except:
+                    raise
+
+                # extract sound of video
+                p = subprocess.Popen(['ffmpeg', '-i', dst_file, '-acodec', 'copy', '-vn',
+                                      task_path + '/sound/audio.aac'], stderr=log_file, stdout=log_file)
+                try:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
+                        raise Exception('Return code not 0 when extract sound from dst.')
                 except:
                     raise
 
@@ -59,7 +70,7 @@ class ExecThread(threading.Thread):
                     ['python', DEEPFACE_PATH, 'extract', '-i', temp_path + '/src_pic', '-o', temp_path + '/src_face'],
                     stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait() != 0:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when extracting src_face.')
                 except:
                     raise
@@ -69,7 +80,7 @@ class ExecThread(threading.Thread):
                     ['python', DEEPFACE_PATH, 'extract', '-i', temp_path + '/dst_pic', '-o', temp_path + '/dst_face'],
                     stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait() != 0:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when extracting dst_face.')
                 except:
                     raise
@@ -91,20 +102,31 @@ class ExecThread(threading.Thread):
                     ['python', DEEPFACE_PATH, 'convert', '-i', temp_path + '/dst_pic', '-o', temp_path + '/result_pic',
                      '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait() != 0:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when converting.')
                 except:
                     raise
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '25', '-i', temp_path + '/result_pic/%d.png', '-pix_fmt', 'yuv420p', task_path +
-                     '/result/result.' + obj.dst_format], stderr=log_file, stdout=log_file)
+                    ['ffmpeg', '-r', '30', '-i', temp_path + '/result_pic/%d.png', '-pix_fmt', 'yuv420p', temp_path +
+                     '/no_sound/result.' + obj.dst_format], stderr=log_file, stdout=log_file)
                 try:
-                    if p.wait() != 0:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when converting result pics into video.')
                 except:
                     raise
+
+                # add sound to result
+                p = subprocess.Popen(['ffmpeg', '-i', temp_path + '/no_sound/result.' + obj.dst_format, '-i',
+                                      task_path + '/sound/audio.aac', task_path + '/result/result.' + obj.dst_format],
+                                     stderr=log_file, stdout=log_file)
+                try:
+                    if p.wait(NORMAL_TASK_TIME_MAX) != 0:
+                        raise Exception('Return code not 0 when add sound to result.')
+                except:
+                    raise
+
                 obj.state = 'FINISHED'
                 obj.save()
                 if obj.email:

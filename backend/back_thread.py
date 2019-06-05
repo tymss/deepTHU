@@ -13,6 +13,7 @@ class BackThread(threading.Thread):
 
     def run(self):
         print('Starting backend thread...')
+        ite = 0
         while True:
             """ clean overtime tasks """
             time_limit = datetime.now(tz=pytz.UTC) - timedelta(days=TASK_MAX_DAYS)
@@ -26,6 +27,23 @@ class BackThread(threading.Thread):
                     if os.path.exists(path):
                         shutil.rmtree(path)
                     each.delete()
+
+            """ clean failed tasks """
+            objs = Task.objects.filter(state='FAILED')
+            for each in objs:
+                path = TASK_PATH + each.task_id
+                if os.path.exists(path):
+                    shutil.rmtree(path)
+                path = TEMP_PATH + each.task_id
+                if os.path.exists(path):
+                    shutil.rmtree(path)
+
+            """ clean finished tasks' temp """
+            objs = Task.objects.filter(state='FINISHED')
+            for each in objs:
+                path = TEMP_PATH + each.task_id
+                if os.path.exists(path):
+                    shutil.rmtree(path)
 
             """ schedule """
             objs = Task.objects.filter(state='RUNNING')
@@ -41,6 +59,7 @@ class BackThread(threading.Thread):
                     running_num += 1
                 else:
                     break
+            ite += 1
             time.sleep(REFRESH_INTERVAL)
 
 
