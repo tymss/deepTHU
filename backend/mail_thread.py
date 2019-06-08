@@ -34,6 +34,14 @@ class MailThread(threading.Thread):
             <p>请注意您的任务从创建起最多在我们的服务器上保存30天，过期将会自动删除。</p>
             <p>deepTHU</p>
             """ % self.task_id
+        elif self.state == 'FAILED':
+            title = 'deepTHU——任务失败'
+            body = """
+            <p>非常抱歉，您的任务:<b>%s</b>由于某些原因意外失败。</p>
+            <p>请仔细阅读网站的使用说明，重新上传任务。</p>
+            <p>deepTHU</p>
+            """ % self.task_id
+
         message = MIMEText(body, 'html', 'utf-8')
         message['From'] = sender
         message['To'] = self.dst_addr

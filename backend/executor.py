@@ -42,6 +42,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when convert src video to pics.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -53,6 +55,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when convert dst video to pics.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -62,6 +66,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when extract sound from dst.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -72,6 +78,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when extracting src_face.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -82,6 +90,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when extracting dst_face.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -104,6 +114,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when converting.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -114,6 +126,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when converting result pics into video.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -124,6 +138,8 @@ class ExecThread(threading.Thread):
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
                         raise Exception('Return code not 0 when add sound to result.')
+                except subprocess.TimeoutExpired:
+                    p.kill()
                 except:
                     raise
 
@@ -135,4 +151,6 @@ class ExecThread(threading.Thread):
             print(e)
             obj.state = 'FAILED'
             obj.save()
+            if obj.email:
+                send_mail(self.task_id, obj.email, 'FAILED')
 
