@@ -69,6 +69,16 @@ def init_thread():
     """ add all RUNNING (not finished) tasks into waiting list. """
     running_objs = Task.objects.filter(state='RUNNING')
     for each in running_objs:
+        task_path = TASK_PATH + each.task_id
+        temp_path = TEMP_PATH + each.task_id
+        if os.path.exists(temp_path):
+            shutil.rmtree(temp_path)
+        if os.path.exists(task_path + '/sound'):
+            shutil.rmtree(task_path + '/sound')
+        if os.path.exists(task_path + '/model'):
+            shutil.rmtree(task_path + '/model')
+        if os.path.exists(task_path + '/result'):
+            shutil.rmtree(task_path + '/result')
         each.state = 'CREATED'
         each.save()
     thread = BackThread()

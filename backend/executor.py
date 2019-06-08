@@ -28,7 +28,6 @@ class ExecThread(threading.Thread):
         check_and_makedirs(temp_path + '/src_face')
         check_and_makedirs(temp_path + '/dst_face')
         check_and_makedirs(task_path + '/model')
-        check_and_makedirs(temp_path + '/result_pic')
         check_and_makedirs(temp_path + '/no_sound')
         check_and_makedirs(task_path + '/result')
         try:
@@ -109,7 +108,7 @@ class ExecThread(threading.Thread):
 
                 # convert
                 p = subprocess.Popen(
-                    ['python', DEEPFACE_PATH, 'convert', '-i', temp_path + '/dst_pic', '-o', temp_path + '/result_pic',
+                    ['python', DEEPFACE_PATH, 'convert', '-i', temp_path + '/dst_pic', '-o', temp_path + '/dst_pic',
                      '-m', task_path + '/model'], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
@@ -121,7 +120,7 @@ class ExecThread(threading.Thread):
 
                 # convert result pics into video
                 p = subprocess.Popen(
-                    ['ffmpeg', '-r', '30', '-i', temp_path + '/result_pic/%d.png', '-pix_fmt', 'yuv420p', temp_path +
+                    ['ffmpeg', '-r', '30', '-i', temp_path + '/dst_pic/%d.png', '-pix_fmt', 'yuv420p', temp_path +
                      '/no_sound/result.' + obj.dst_format], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
@@ -133,7 +132,7 @@ class ExecThread(threading.Thread):
 
                 # add sound to result
                 p = subprocess.Popen(['ffmpeg', '-i', temp_path + '/no_sound/result.' + obj.dst_format, '-i',
-                                      task_path + '/sound/audio.aac', task_path + '/result/result.' + obj.dst_format],
+                                      task_path + '/sound/audio.aac', '-strict', '-2', task_path + '/result/result.' + obj.dst_format],
                                      stderr=log_file, stdout=log_file)
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
