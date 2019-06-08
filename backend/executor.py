@@ -60,7 +60,7 @@ class ExecThread(threading.Thread):
                     raise
 
                 # extract sound of video
-                p = subprocess.Popen(['ffmpeg', '-i', dst_file, '-acodec', 'copy', '-vn',
+                p = subprocess.Popen(['ffmpeg', '-i', dst_file, '-acodec', 'acc', '-vn', '-strict', '-2',
                                       task_path + '/sound/audio.aac'], stderr=log_file, stdout=log_file)
                 try:
                     if p.wait(NORMAL_TASK_TIME_MAX) != 0:
