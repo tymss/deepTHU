@@ -7,6 +7,7 @@ from .models import Task
 from datetime import datetime, timedelta
 from .configs import TASK_MAX_DAYS, TASK_PATH, REFRESH_INTERVAL, MAX_RUNNING_NUM, TEMP_PATH
 from .executor import ExecThread
+from .utils import check_and_makedirs
 
 
 class BackThread(threading.Thread):
@@ -14,6 +15,7 @@ class BackThread(threading.Thread):
     def run(self):
         print('Starting backend thread...')
         ite = 0
+        check_and_makedirs(TASK_PATH + 'log')
         while True:
             """ clean overtime tasks """
             time_limit = datetime.now(tz=pytz.UTC) - timedelta(days=TASK_MAX_DAYS)

@@ -32,7 +32,7 @@ class ExecThread(threading.Thread):
         check_and_makedirs(temp_path + '/no_sound')
         check_and_makedirs(task_path + '/result')
         try:
-            with open(task_path + '/task.log', 'a') as log_file:
+            with open(TASK_PATH + 'log/' + self.task_id + '.log', 'a') as log_file:
 
                 # convert src video into pics
                 dirs = os.listdir(task_path + '/src')
