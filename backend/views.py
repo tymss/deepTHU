@@ -41,7 +41,7 @@ def src_upload_view(request):
         if uploaded.size > MAX_SIZE:
             return Response(get_err_response('Your file should be smaller than %dB.' % MAX_SIZE), status=413)
 
-        if uploaded.name.split('.')[-1] not in SUPPORTED_FORMAT:
+        if uploaded.name.split('.')[-1].lower() not in SUPPORTED_FORMAT:
             return Response(get_err_response('Video format not supported.'), status=400)
 
         if email is None:
@@ -93,10 +93,10 @@ def dst_upload_view(request):
         if uploaded.size > MAX_SIZE:
             return Response(get_err_response('Your file should be smaller than %dB.' % MAX_SIZE), status=413)
 
-        if uploaded.name.split('.')[-1] not in SUPPORTED_FORMAT:
+        if uploaded.name.split('.')[-1].lower() not in SUPPORTED_FORMAT:
             return Response(get_err_response('Video format not supported.'), status=400)
 
-        obj.dst_format = uploaded.name.split('.')[-1]
+        obj.dst_format = uploaded.name.split('.')[-1].lower()
 
         file_path = task_path + '/dst/' + uploaded.name
         try:
