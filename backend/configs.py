@@ -6,7 +6,7 @@ TEMP_PATH = '/mnt/task/'
 
 DEEPFACE_PATH = '/home/azure2016080036/project/faceswap/faceswap.py'
 
-MAX_SIZE = (1 << 20) * 50  # B
+MAX_SIZE = (1 << 20) * 200  # B
 
 REFRESH_INTERVAL = 60  # seconds
 
