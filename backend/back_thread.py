@@ -15,7 +15,8 @@ class BackThread(threading.Thread):
     def run(self):
         print('Starting backend thread...')
         ite = 0
-        check_and_makedirs(TASK_PATH + 'log')
+        if not os.path.exists(TASK_PATH + 'log'):
+            os.makedirs(TASK_PATH + 'log')
         while True:
             """ clean overtime tasks """
             time_limit = datetime.now(tz=pytz.UTC) - timedelta(days=TASK_MAX_DAYS)
