@@ -16,6 +16,6 @@ MAX_RUNNING_NUM = 1
 
 MAX_TRAINING_HOURS = 7
 
-SUPPORTED_FORMAT = ['mp4', 'mkv', 'avi', 'mov', 'flv']
+SUPPORTED_FORMAT = ['mp4', 'mkv', 'avi', 'mov']
 
 NORMAL_TASK_TIME_MAX = 7200  # seconds
