@@ -1,10 +1,10 @@
 STATE_LIST = ['CREATING', 'CREATED', 'RUNNING', 'FINISHED', 'FAILED']
 
-TASK_PATH = '/home/azure2016080036/task/'
+TASK_PATH = '/home/********/task/'
 
 TEMP_PATH = '/mnt/task/'
 
-DEEPFACE_PATH = '/home/azure2016080036/project/faceswap/faceswap.py'
+DEEPFACE_PATH = '/home/********/project/faceswap/faceswap.py'
 
 MAX_SIZE = (1 << 20) * 200  # B
 
