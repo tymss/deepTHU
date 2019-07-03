@@ -4,10 +4,10 @@ from email.mime.text import MIMEText
 from email.header import Header
 
 
-sender = 'deepthu@163.com'
-username = 'deepthu'
-password = 'deepthu0036'
-smtpServer = 'smtp.163.com'
+sender = '********'
+username = '*********'
+password = '**********'
+smtpServer = '**********'
 
 
 class MailThread(threading.Thread):
